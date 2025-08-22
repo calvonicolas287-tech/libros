@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Carrito</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet"/>
+</head>
+<body class="bg-gray-100">
+  <div class="container mx-auto py-8">
+    <h2 class="text-2xl mb-4">🛒 Tu Carrito</h2>
+    <ul id="lista-carrito" class="mb-4 space-y-4"></ul>
+    <p id="total" class="font-semibold mb-4"></p>
+
+    <div class="space-x-4">
+      <button onclick="checkout()" class="bg-green-600 text-white px-4 py-2 rounded">Pagar con Mercado Pago</button>
+      <button onclick="vaciarCarrito()" class="bg-red-600 text-white px-4 py-2 rounded">Vaciar carrito</button>
+      <a href="index.html" class="text-blue-600 hover:underline">← Seguir comprando</a>
+    </div>
+  </div>
+
+  <script>
+    let cart = JSON.parse(localStorage.getItem('cart')) || [];
+    const token = localStorage.getItem('token') || '';
+    const lista = document.getElementById('lista-carrito');
+    const totalP = document.getElementById('total');
+
+    function renderCarrito() {
+      lista.innerHTML = '';
+      let total = 0;
+
+      cart.forEach((item, index) => {
+        const li = document.createElement('li');
+        li.className = 'bg-white p-4 rounded shadow flex justify-between items-center';
+
+        li.innerHTML = `
+          <div>
+            <h3 class="font-bold">${item.title}</h3>
+            <p>$${item.price.toFixed(2)} x ${item.quantity}</p>
+            <p class="text-sm text-gray-600">Subtotal: $${(item.price * item.quantity).toFixed(2)}</p>
+          </div>
+          <div class="space-x-2">
+            <button onclick="sumar(${index})" class="px-2 bg-blue-500 text-white rounded">+</button>
+            <button onclick="restar(${index})" class="px-2 bg-yellow-500 text-white rounded">−</button>
+            <button onclick="quitar(${index})" class="px-2 bg-red-500 text-white rounded">🗑️</button>
+          </div>
+        `;
+
+        lista.appendChild(li);
+        total += item.price * item.quantity;
+      });
+
+      totalP.textContent = `Total: $${total.toFixed(2)}`;
+      localStorage.setItem('cart', JSON.stringify(cart));
+    }
+
+    function sumar(index) {
+      cart[index].quantity += 1;
+      renderCarrito();
+    }
+
+    function restar(index) {
+      if (cart[index].quantity > 1) {
+        cart[index].quantity -= 1;
+      } else {
+        quitar(index);
+      }
+      renderCarrito();
+    }
+
+    function quitar(index) {
+      cart.splice(index, 1);
+      renderCarrito();
+    }
+
+    function vaciarCarrito() {
+      if (confirm('¿Estás seguro de que querés vaciar el carrito?')) {
+        cart = [];
+        renderCarrito();
+      }
+    }
+
+    function checkout() {
+      if (!token) {
+        alert('Debes iniciar sesión');
+        return window.location.href = 'login.html';
+      }
+
+      if (cart.length === 0) {
+        alert('Tu carrito está vacío');
+        return;
+      }
+
+      fetch('/crear-preferencia', {
+        method: 'POST',
+        headers: {
+          'Content-Type':  'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ cart })
+      })
+      .then(res => res.json())
+      .then(d => window.location.href = d.init_point)
+      .catch(() => alert('Error al crear preferencia'));
+    }
+
+    document.addEventListener('DOMContentLoaded', renderCarrito);
+  </script>
+</body>
+</html>

@@ -1,0 +1,19 @@
+<script src="config.js"></script>
+<script>
+  document.getElementById('form-libro').addEventListener('submit', e => {
+    e.preventDefault();
+    const datos = Object.fromEntries(new FormData(e.target));
+    const token = localStorage.getItem('token');
+
+    fetch(`${API_URL}/libros`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify(datos)
+    })
+    .then(res => res.json())
+    .then(data => alert(data.mensaje || data.error));
+  });
+</script>

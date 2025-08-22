@@ -1,0 +1,18 @@
+<script src="config.js"></script>
+
+const token = localStorage.getItem('token');
+fetch(`${API_URL}/dashboard`, {
+  headers: { Authorization: `Bearer ${token}` }
+})
+.then(res => res.json())
+.then(data => {
+  const stats = document.getElementById('stats');
+  stats.innerHTML = `
+    <p>Total vendido: $${data.totalVentas}</p>
+    <h2>Libros más vendidos:</h2>
+    <ul>
+      ${Object.entries(data.librosVendidos).map(([titulo, cantidad]) =>
+        `<li>${titulo}: ${cantidad} vendidos</li>`).join('')}
+    </ul>
+  `;
+});
