@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Iniciar sesión</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100">
+  <div class="container mx-auto py-12 max-w-md">
+    <h2 class="text-2xl font-bold mb-6 text-center">Iniciar sesión</h2>
+    <div class="bg-white p-6 rounded shadow">
+      <label for="email" class="block mb-2 font-semibold">Correo electrónico</label>
+      <input type="email" id="email" class="w-full border px-3 py-2 rounded mb-4" placeholder="tucorreo@ejemplo.com" />
+      <button onclick="login()" class="w-full bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Ingresar</button>
+    </div>
+    <p class="mt-6 text-center text-gray-600">
+      ¿No tenés cuenta? <a href="registro.html" class="text-green-600 hover:underline">Crear cuenta</a>
+    </p>
+  </div>
+
+  <script>
+    function login() {
+      const email = document.getElementById('email').value.trim();
+      if (!email) return alert('Por favor ingresá tu correo');
+
+      fetch('/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.token) {
+          localStorage.setItem('token', data.token);
+
+          // Extraer email del token
+          const payload = JSON.parse(atob(data.token.split('.')[1]));
+          localStorage.setItem('userEmail', payload.email);
+
+          // Verificar si es admin
+          const adminEmail = 'calvonicolas287@gmail.com';
+          localStorage.setItem('isAdmin', payload.email === adminEmail ? 'true' : 'false');
+
+          alert('Sesión iniciada correctamente');
+          window.location.href = 'index.html';
+        } else {
+          alert('Correo no registrado o inválido');
+        }
+      })
+      .catch(() => alert('Error de conexión con el servidor'));
+    }
+  </script>
+</body>
+</html>
