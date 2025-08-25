@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Subir Libro</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+
+  <form id="form-libro" class="bg-white p-6 rounded shadow-md w-full max-w-md space-y-4">
+    <h2 class="text-xl font-bold text-center">Subir nuevo libro</h2>
+
+    <input type="text" name="titulo" placeholder="Título" required class="w-full p-2 border rounded" />
+    <textarea name="descripcion" placeholder="Descripción" required class="w-full p-2 border rounded"></textarea>
+    <input type="number" name="precio" placeholder="Precio" required class="w-full p-2 border rounded" />
+    <input type="url" name="imagen" placeholder="URL de imagen" required class="w-full p-2 border rounded" />
+
+    <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">Agregar libro</button>
+  </form>
+
+  <script src="config.js"></script>
+  <script>
+    document.getElementById('form-libro').addEventListener('submit', e => {
+      e.preventDefault();
+      const datos = Object.fromEntries(new FormData(e.target));
+      const token = localStorage.getItem('token');
+
+      fetch(`${API_URL}/libros`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify(datos)
+      })
+      .then(res => res.json())
+      .then(data => alert(data.mensaje || data.error));
+    });
+  </script>
+</body>
+</html>
