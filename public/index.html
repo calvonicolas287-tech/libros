@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Librería Digital</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+
+  <!-- 🧭 Encabezado con menú de usuario y carrito -->
+  <header class="bg-blue-600 text-white p-4 flex justify-between items-center shadow">
+    <h1 class="text-2xl font-bold">Librería Digital</h1>
+    <nav class="flex space-x-4">
+      <div id="user-menu"></div>
+      <div id="cart-menu"></div>
+    </nav>
+  </header>
+
+  <!-- 📚 Contenedor de libros -->
+  <main class="p-6">
+    <div id="libros-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <!-- Aquí se insertan los libros dinámicamente -->
+    </div>
+  </main>
+
+  <!-- 🧪 Script de renderizado de libros -->
+  <script>
+    console.log('✅ Script libros cargado');
+    const contenedor = document.getElementById('libros-container');
+
+    function renderizarLibros(libros) {
+      contenedor.innerHTML = '';
+      libros.forEach(libro => {
+        const card = document.createElement('div');
+        card.className = 'bg-white p-4 rounded shadow hover:shadow-lg';
+        card.innerHTML = `
+          <img src="${libro.imagen || 'https://placehold.co/150x150?text=Sin+imagen'}"
+               alt="${libro.titulo}"
+               class="w-full h-48 object-cover rounded mb-2"/>
+          <h3 class="text-xl font-bold">${libro.titulo}</h3>
+          <p class="text-gray-700 mb-2">${libro.descripcion}</p>
+          <p class="font-semibold mb-2">Precio: $${libro.precio.toFixed(2)}</p>
+          <button onclick="addToCart(${libro.id})"
+                  class="bg-blue-600 text-white px-3 py-1 rounded">
+            Agregar al carrito
+          </button>
+          <button onclick="verDetalle(${libro.id})"
+                  class="ml-2 text-blue-600 hover:underline">
+            Ver más
+          </button>
+        `;
+        contenedor.appendChild(card);
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      fetch('/libros')
+        .then(res => res.ok ? res.json() : Promise.reject('Error en fetch'))
+        .then(renderizarLibros)
+        .catch(err => {
+          console.error('❌ Error al cargar libros:', err);
+          contenedor.innerHTML =
+            '<p class="text-red-500">Error al cargar los libros</p>';
+        });
+    });
+  </script>
+
+  <!-- Scripts de login y carrito -->
+  <script src="js/login.js"></script>
+  <script src="js/cart.js"></script>
+</body>
+</html>
